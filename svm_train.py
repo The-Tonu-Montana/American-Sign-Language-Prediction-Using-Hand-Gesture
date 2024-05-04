@@ -3,19 +3,10 @@ import numpy as np
 import random
 from numpy.linalg import norm
 
-# svm_params = dict( kernel_type = cv2.SVM_RBF,
-#                     svm_type = cv2.SVM_C_SVC,
-#                     C=2.67, gamma=5.383 )
-
-
-svm_params = dict( kernel_type = cv2.ml.SVM_RBF,
-                    svm_type = cv2.ml.SVM_C_SVC,
-                    C=2.67, gamma=5.383 )
-
 
 class StatModel(object):
     def load(self, fn):
-        self.model.load(fn)  #python rapper bug
+        self.model.load(fn)
     def save(self, fn):
         self.model.save(fn)
 
@@ -27,24 +18,14 @@ class SVM(StatModel):
         self.model.setType(cv2.ml.SVM_C_SVC)
         self.model.setC(1.0)
         self.model.setGamma(0.5)
-        # self.model.setGamma(gamma)
-        # self.model.setC(C)
-        # self.model.setKernel(cv2.SVM_RBF)
-        # self.model.setType(cv2.SVM_C_SVC)
 
     def train(self, samples, responses):
-        # Convert samples and responses to numpy arrays if they are not already
         samples = np.array(samples)
         responses = np.array(responses)
 
-        # Ensure that responses are reshaped if needed
         if responses.ndim == 1:
             responses = responses.reshape(-1, 1)
 
-        # Determine the layout based on the shape of the responses
-        # layout = cv2.ml.ROW_SAMPLE if responses.shape[1] == 1 else cv2.ml.COL_SAMPLE
-        # Determine the layout based on the shape of the responses
-        # Determine the layout based on the shape of the responses
         layout = cv2.ml.ROW_SAMPLE if responses.shape[0] > responses.shape[1] else cv2.ml.COL_SAMPLE
 
         print("Samples shape:", samples.shape)
@@ -53,18 +34,14 @@ class SVM(StatModel):
         print("Number of samples in samples:", samples.shape[0])
         print("Number of samples in responses:", responses.shape[0])
 
-        # Create a TrainData object using cv2.ml.TrainData_create()
         trainData = cv2.ml.TrainData_create(samples=samples,
                                             layout=layout,
                                      responses=responses)
-
-
 
         self.model.train(trainData)
 
     def predict(self, samples):
         return self.model.predict(samples)[1].ravel()
-        #return self.model.predict_all(samples).ravel()
 
 def preprocess_hog(digits):
     samples = []
@@ -121,22 +98,19 @@ def trainSVM(num):
         for j in range(1,401):
             # if chr(i) in ['R','Z']:
             #     continue
-            imgs.append(cv2.imread('TrainData/'+chr(i)+'_'+str(j)+'.jpg',0))  # all images saved in a list
-            #print("Reading : "+'TrainData/'+chr(i)+'_'+str(j)+'.jpg')
+            imgs.append(cv2.imread('TrainData/'+chr(i)+'_'+str(j)+'.jpg',0)) 
+
         print("RMSE : "+str(per)+"")
-    labels = np.repeat(np.arange(1,num+1), 400) # label for each corresponding image saved above
+    labels = np.repeat(np.arange(1,num+1), 400)
 
-    # numbers = [i for i in range(1, 27) if i not in [18, 26]]
-    # labels = np.concatenate([np.full(100, num) for num in numbers])
-
-    samples=preprocess_hog(imgs)                # images sent for pre processeing using hog which returns features for the images 
+    samples=preprocess_hog(imgs) 
     print('CNN is building please wait is building wait some time ...')
     print("Len of Labels : ",len(labels))
     print("Len of Samples: ",len(samples))
     model = SVM(C=2.67, gamma=5.383) 
 
     My_debug(labels)
-    model.train(samples ,labels)  # features trained against the labels using svm
+    model.train(samples ,labels)
     return model
 
 def predict(model,img):
